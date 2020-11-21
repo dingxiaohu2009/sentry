@@ -3,20 +3,15 @@ import React from 'react';
 import {t} from 'app/locale';
 
 import ReleaseListDropdown from './releaseListDropdown';
+import {DisplayOption} from './utils';
 
-const options = [
-  {
-    key: 'active',
-    label: t('Active'),
-  },
-  {
-    key: 'archived',
-    label: t('Archived'),
-  },
-];
+const displayOptions = {
+  [DisplayOption.CRASH_FREE_USERS]: t('Crash Free Users'),
+  [DisplayOption.CRASH_FREE_SESSIONS]: t('Crash Free Sessions'),
+};
 
 type Props = {
-  selected: string;
+  selected: DisplayOption;
   onSelect: (key: string) => void;
 };
 
@@ -24,7 +19,7 @@ function ReleaseListDisplayOptions({selected, onSelect}: Props) {
   return (
     <ReleaseListDropdown
       label={t('Display')}
-      options={options}
+      options={displayOptions}
       selected={selected}
       onSelect={onSelect}
     />

@@ -2,31 +2,29 @@ import React from 'react';
 
 import DropdownControl, {DropdownItem} from 'app/components/dropdownControl';
 
-type Option = {
-  key: string;
-  label: string;
-};
+import {DisplayOption, StatusOption} from './utils';
 
 type Props = {
   label: string;
-  options: Option[];
+  options: Record<DisplayOption, string> | Record<StatusOption, string>;
   selected: string;
   onSelect: (key: string) => void;
 };
 
-const ReleaseListDropdown = ({label, options, selected, onSelect}: Props) => {
-  const selectedOption = options.find(option => option.key === selected)?.label;
+const ReleaseListDropdown = ({label: prefix, options, selected, onSelect}: Props) => {
+  const optionEntries = Object.entries(options);
+  const selectedLabel = optionEntries.find(([key, _value]) => key === selected)?.[1];
 
   return (
-    <DropdownControl buttonProps={{prefix: label}} label={selectedOption}>
-      {options.map(option => (
+    <DropdownControl buttonProps={{prefix}} label={selectedLabel}>
+      {optionEntries.map(([key, label]) => (
         <DropdownItem
-          key={option.key}
+          key={key}
           onSelect={onSelect}
-          eventKey={option.key}
-          isActive={selected === option.key}
+          eventKey={key}
+          isActive={selected === key}
         >
-          {option.label}
+          {label}
         </DropdownItem>
       ))}
     </DropdownControl>
