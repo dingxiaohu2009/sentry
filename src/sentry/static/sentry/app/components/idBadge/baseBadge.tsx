@@ -78,7 +78,7 @@ const DisplayNameAndDescription = styled('div')`
 const DisplayName = styled('span')`
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1;
+  line-height: 1.2;
 `;
 
 const Description = styled('div')`

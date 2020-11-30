@@ -5,6 +5,7 @@ import {initializeOrg} from 'sentry-test/initializeOrg';
 
 import ProjectsStore from 'app/stores/projectsStore';
 import ReleasesList from 'app/views/releases/list/';
+import {DisplayOption, StatusOption} from 'app/views/releases/list/utils';
 
 describe('ReleasesList', function () {
   const {organization, routerContext, router} = initializeOrg();
@@ -17,11 +18,11 @@ describe('ReleasesList', function () {
     location: {
       query: {
         query: 'derp',
-        sort: 'crash_free_sessions',
+        display: DisplayOption.CRASH_FREE_SESSIONS,
         healthStatsPeriod: '24h',
         healthStat: 'sessions',
         somethingBad: 'XXX',
-        display: 'active',
+        status: StatusOption.ACTIVE,
       },
     },
   };
@@ -127,40 +128,40 @@ describe('ReleasesList', function () {
     });
   });
 
-  it('sorts releases', function () {
+  it('sorts releases by display option', function () {
     expect(endpointMock).toHaveBeenCalledWith(
       '/organizations/org-slug/releases/',
       expect.objectContaining({
-        query: expect.objectContaining({display: 'crash_free_sessions'}),
+        query: expect.objectContaining({display: DisplayOption.CRASH_FREE_SESSIONS}),
       })
     );
 
-    const sortDropdown = wrapper.find('ReleaseListSortOptions').first();
-    const sortOptions = sortDropdown.find('DropdownItem span');
-    const sortByCrashFreeUsers = sortOptions.at(0);
+    const displayDropdown = wrapper.find('ReleaseListDisplayOptions');
+    const displayOptions = displayDropdown.find('DropdownItem span');
 
-    expect(sortOptions).toHaveLength(2);
-    expect(sortByCrashFreeUsers.text()).toEqual('Crash Free Users');
+    const crashFreeUsersOption = displayOptions.at(0);
+    expect(displayOptions).toHaveLength(2);
+    expect(crashFreeUsersOption.text()).toEqual('Crash Free Users');
 
-    sortByCrashFreeUsers.simulate('click');
+    crashFreeUsersOption.simulate('click');
 
     expect(router.push).toHaveBeenCalledWith({
       query: expect.objectContaining({
-        display: 'crash_free_users',
+        display: DisplayOption.CRASH_FREE_USERS,
       }),
     });
   });
 
   it('displays archived releases', function () {
     const archivedWrapper = mountWithTheme(
-      <ReleasesList {...props} location={{query: {status: 'archived'}}} />,
+      <ReleasesList {...props} location={{query: {status: StatusOption.ARCHIVED}}} />,
       routerContext
     );
 
     expect(endpointMock).toHaveBeenLastCalledWith(
       '/organizations/org-slug/releases/',
       expect.objectContaining({
-        query: expect.objectContaining({status: 'archived'}),
+        query: expect.objectContaining({status: StatusOption.ARCHIVED}),
       })
     );
 
@@ -180,7 +181,7 @@ describe('ReleasesList', function () {
     statusActiveOption.simulate('click');
     expect(router.push).toHaveBeenLastCalledWith({
       query: expect.objectContaining({
-        status: 'active',
+        status: StatusOption.ACTIVE,
       }),
     });
 
@@ -189,7 +190,7 @@ describe('ReleasesList', function () {
     statusArchivedOption.simulate('click');
     expect(router.push).toHaveBeenLastCalledWith({
       query: expect.objectContaining({
-        status: 'archived',
+        status: StatusOption.ARCHIVED,
       }),
     });
   });
