@@ -26,10 +26,10 @@ import AsyncView from 'app/views/asyncView';
 import ReleaseArchivedNotice from '../detail/overview/releaseArchivedNotice';
 
 import ReleaseCard from './releaseCard';
+import ReleaseDisplayOptions from './releaseDisplayOptions';
 import ReleaseLanding from './releaseLanding';
 import ReleaseListSortOptions from './releaseListSortOptions';
 import ReleaseListStatusOptions from './releaseListStatusOptions';
-import ReleaseDisplayOptions from './releaseDisplayOptions';
 import {DisplayOption, SortOption, StatusOption} from './utils';
 
 type RouteParams = {
