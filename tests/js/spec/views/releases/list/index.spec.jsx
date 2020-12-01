@@ -179,7 +179,6 @@ describe('ReleasesList', function () {
     const displayOptions = displayDropdown.find('DropdownItem');
     expect(displayOptions).toHaveLength(2);
 
-
     const crashFreeUsersOption = displayOptions.at(0);
     expect(crashFreeUsersOption.text()).toEqual('Crash Free Users');
 

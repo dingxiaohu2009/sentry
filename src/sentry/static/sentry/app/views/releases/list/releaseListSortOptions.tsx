@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from '@emotion/styled';
 
 import {t} from 'app/locale';
 
@@ -20,7 +21,7 @@ type Props = {
 
 function ReleaseListSortOptions({selected, onSelect}: Props) {
   return (
-    <ReleaseListDropdown
+    <StyledReleaseListDropdown
       label={t('Sort By')}
       options={sortOptions}
       selected={selected}
@@ -30,3 +31,7 @@ function ReleaseListSortOptions({selected, onSelect}: Props) {
 }
 
 export default ReleaseListSortOptions;
+
+const StyledReleaseListDropdown = styled(ReleaseListDropdown)`
+  z-index: 2;
+`;

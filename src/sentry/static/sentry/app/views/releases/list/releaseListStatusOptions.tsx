@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from '@emotion/styled';
 
 import {t} from 'app/locale';
 
@@ -17,7 +18,7 @@ type Props = {
 
 function ReleaseListStatusOptions({selected, onSelect}: Props) {
   return (
-    <ReleaseListDropdown
+    <StyledReleaseListDropdown
       label={t('Status')}
       options={options}
       selected={selected}
@@ -27,3 +28,7 @@ function ReleaseListStatusOptions({selected, onSelect}: Props) {
 }
 
 export default ReleaseListStatusOptions;
+
+const StyledReleaseListDropdown = styled(ReleaseListDropdown)`
+  z-index: 3;
+`;

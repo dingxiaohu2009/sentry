@@ -12,14 +12,21 @@ type Props = {
     | Record<StatusOption, string>;
   selected: string;
   onSelect: (key: string) => void;
+  className?: string;
 };
 
-const ReleaseListDropdown = ({label: prefix, options, selected, onSelect}: Props) => {
+const ReleaseListDropdown = ({
+  label: prefix,
+  options,
+  selected,
+  onSelect,
+  className,
+}: Props) => {
   const optionEntries = Object.entries(options);
   const selectedLabel = optionEntries.find(([key, _value]) => key === selected)?.[1];
 
   return (
-    <DropdownControl buttonProps={{prefix}} label={selectedLabel}>
+    <DropdownControl buttonProps={{prefix}} label={selectedLabel} className={className}>
       {optionEntries.map(([key, label]) => (
         <DropdownItem
           key={key}
