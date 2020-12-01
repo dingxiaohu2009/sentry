@@ -58,6 +58,7 @@ class ReleasesList extends AsyncView<Props, State> {
     const {statsPeriod} = location.query;
     const activeSort = this.getSort();
     const activeStatus = this.getStatus();
+    const activeDisplay = this.getDisplay();
 
     const query = {
       ...pick(location.query, [
@@ -67,11 +68,11 @@ class ReleasesList extends AsyncView<Props, State> {
         'query',
         'sort',
         'healthStatsPeriod',
-        'healthStat',
       ]),
       summaryStatsPeriod: statsPeriod,
       per_page: 25,
       health: 1,
+      healthStat: activeDisplay === DisplayOption.CRASH_FREE_USERS ? 'users' : 'sessions',
       flatten: activeSort === SortOption.DATE ? 0 : 1,
       status:
         activeStatus === StatusOption.ARCHIVED
