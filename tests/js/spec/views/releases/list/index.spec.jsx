@@ -5,7 +5,7 @@ import {initializeOrg} from 'sentry-test/initializeOrg';
 
 import ProjectsStore from 'app/stores/projectsStore';
 import ReleasesList from 'app/views/releases/list/';
-import {DisplayOption, StatusOption} from 'app/views/releases/list/utils';
+import {DisplayOption, SortOption, StatusOption} from 'app/views/releases/list/utils';
 
 describe('ReleasesList', function () {
   const {organization, routerContext, router} = initializeOrg();
@@ -18,7 +18,7 @@ describe('ReleasesList', function () {
     location: {
       query: {
         query: 'derp',
-        display: DisplayOption.CRASH_FREE_SESSIONS,
+        sort: SortOption.SESSIONS,
         healthStatsPeriod: '24h',
         healthStat: 'sessions',
         somethingBad: 'XXX',
@@ -107,6 +107,24 @@ describe('ReleasesList', function () {
     expect(wrapper.find('EmptyMessage').text()).toEqual(
       "There are no releases that match: 'abc'."
     );
+
+    location = {query: {sort: SortOption.SESSIONS, statsPeriod: '7d'}};
+    wrapper = mountWithTheme(
+      <ReleasesList {...props} location={location} />,
+      routerContext
+    );
+    expect(wrapper.find('EmptyMessage').text()).toEqual(
+      'There are no releases with data in the last 7 days.'
+    );
+
+    location = {query: {sort: SortOption.USERS_24_HOURS, statsPeriod: '7d'}};
+    wrapper = mountWithTheme(
+      <ReleasesList {...props} location={location} />,
+      routerContext
+    );
+    expect(wrapper.find('EmptyMessage').text()).toEqual(
+      'There are no releases with active user data (users in the last 24 hours).'
+    );
   });
 
   it('searches for a release', function () {
@@ -128,22 +146,48 @@ describe('ReleasesList', function () {
     });
   });
 
-  it('sorts releases by display option', function () {
+  it('sorts releases', function () {
     expect(endpointMock).toHaveBeenCalledWith(
       '/organizations/org-slug/releases/',
       expect.objectContaining({
-        query: expect.objectContaining({display: DisplayOption.CRASH_FREE_SESSIONS}),
+        query: expect.objectContaining({sort: SortOption.SESSIONS}),
       })
     );
 
+    const sortDropdown = wrapper.find('ReleaseListSortOptions');
+    const sortByOptions = sortDropdown.find('DropdownItem span');
+
+    const dateCreatedOption = sortByOptions.at(0);
+    expect(sortByOptions).toHaveLength(5);
+    expect(dateCreatedOption.text()).toEqual('Date Created');
+
+    dateCreatedOption.simulate('click');
+
+    expect(router.push).toHaveBeenCalledWith({
+      query: expect.objectContaining({
+        sort: SortOption.DATE,
+      }),
+    });
+  });
+
+  it('display the right Crash Free column', async function () {
     const displayDropdown = wrapper.find('ReleaseListDisplayOptions');
-    const displayOptions = displayDropdown.find('DropdownItem span');
+
+    const activeDisplay = displayDropdown.find('DropdownButton span');
+    expect(activeDisplay.text()).toEqual('Display:Crash Free Sessions');
+
+    const displayOptions = displayDropdown.find('DropdownItem');
+    expect(displayOptions).toHaveLength(2);
+
 
     const crashFreeUsersOption = displayOptions.at(0);
-    expect(displayOptions).toHaveLength(2);
     expect(crashFreeUsersOption.text()).toEqual('Crash Free Users');
 
-    crashFreeUsersOption.simulate('click');
+    const crashFreeSessionsOption = displayOptions.at(1);
+    expect(crashFreeSessionsOption.text()).toEqual('Crash Free Sessions');
+    expect(crashFreeSessionsOption.props().isActive).toEqual(true);
+
+    crashFreeUsersOption.find('span').simulate('click');
 
     expect(router.push).toHaveBeenCalledWith({
       query: expect.objectContaining({

@@ -8,9 +8,11 @@ import EmptyStateWarning from 'app/components/emptyStateWarning';
 import LightWeightNoProjectMessage from 'app/components/lightWeightNoProjectMessage';
 import LoadingIndicator from 'app/components/loadingIndicator';
 import GlobalSelectionHeader from 'app/components/organizations/globalSelectionHeader';
+import {getRelativeSummary} from 'app/components/organizations/timeRangeSelector/utils';
 import PageHeading from 'app/components/pageHeading';
 import Pagination from 'app/components/pagination';
 import SearchBar from 'app/components/searchBar';
+import {DEFAULT_STATS_PERIOD} from 'app/constants';
 import {t} from 'app/locale';
 import {PageContent, PageHeader} from 'app/styles/organization';
 import space from 'app/styles/space';
@@ -25,9 +27,10 @@ import ReleaseArchivedNotice from '../detail/overview/releaseArchivedNotice';
 
 import ReleaseCard from './releaseCard';
 import ReleaseLanding from './releaseLanding';
-import ReleaseListDisplayOptions from './releaseListDisplayOptions';
+import ReleaseListSortOptions from './releaseListSortOptions';
 import ReleaseListStatusOptions from './releaseListStatusOptions';
-import {DisplayOption, StatusOption} from './utils';
+import ReleaseDisplayOptions from './releaseDisplayOptions';
+import {DisplayOption, SortOption, StatusOption} from './utils';
 
 type RouteParams = {
   orgId: string;
@@ -53,7 +56,8 @@ class ReleasesList extends AsyncView<Props, State> {
   getEndpoints(): ReturnType<AsyncView['getEndpoints']> {
     const {organization, location} = this.props;
     const {statsPeriod} = location.query;
-    const status = this.getStatus();
+    const activeSort = this.getSort();
+    const activeStatus = this.getStatus();
 
     const query = {
       ...pick(location.query, [
@@ -61,21 +65,34 @@ class ReleasesList extends AsyncView<Props, State> {
         'environment',
         'cursor',
         'query',
-        'display',
+        'sort',
         'healthStatsPeriod',
         'healthStat',
       ]),
       summaryStatsPeriod: statsPeriod,
       per_page: 25,
       health: 1,
-      flatten: 1,
+      flatten: activeSort === SortOption.DATE ? 0 : 1,
       status:
-        status === StatusOption.ARCHIVED ? ReleaseStatus.Archived : ReleaseStatus.Active,
+        activeStatus === StatusOption.ARCHIVED
+          ? ReleaseStatus.Archived
+          : ReleaseStatus.Active,
     };
 
-    return [
+    const endpoints: ReturnType<AsyncView['getEndpoints']> = [
       ['releasesWithHealth', `/organizations/${organization.slug}/releases/`, {query}],
     ];
+
+    // when sorting by date we fetch releases without health and then fetch health lazily
+    if (activeSort === SortOption.DATE) {
+      endpoints.push([
+        'releasesWithoutHealth',
+        `/organizations/${organization.slug}/releases/`,
+        {query: {...query, health: 0}},
+      ]);
+    }
+
+    return endpoints;
   }
 
   onRequestSuccess({stateKey, data, jqXHR}) {
@@ -116,6 +133,23 @@ class ReleasesList extends AsyncView<Props, State> {
     return typeof query === 'string' ? query : undefined;
   }
 
+  getSort(): SortOption {
+    const {sort} = this.props.location.query;
+
+    switch (sort) {
+      case SortOption.CRASH_FREE_USERS:
+        return SortOption.CRASH_FREE_USERS;
+      case SortOption.CRASH_FREE_SESSIONS:
+        return SortOption.CRASH_FREE_SESSIONS;
+      case SortOption.SESSIONS:
+        return SortOption.SESSIONS;
+      case SortOption.USERS_24_HOURS:
+        return SortOption.USERS_24_HOURS;
+      default:
+        return SortOption.DATE;
+    }
+  }
+
   getDisplay(): DisplayOption {
     const {display} = this.props.location.query;
 
@@ -144,6 +178,15 @@ class ReleasesList extends AsyncView<Props, State> {
     router.push({
       ...location,
       query: {...location.query, cursor: undefined, query},
+    });
+  };
+
+  handleSortBy = (sort: string) => {
+    const {location, router} = this.props;
+
+    router.push({
+      ...location,
+      query: {...location.query, cursor: undefined, sort},
     });
   };
 
@@ -179,7 +222,8 @@ class ReleasesList extends AsyncView<Props, State> {
     const {location, organization} = this.props;
     const {statsPeriod} = location.query;
     const searchQuery = this.getQuery();
-    const status = this.getStatus();
+    const activeSort = this.getSort();
+    const activeStatus = this.getStatus();
 
     if (searchQuery && searchQuery.length) {
       return (
@@ -189,7 +233,27 @@ class ReleasesList extends AsyncView<Props, State> {
       );
     }
 
-    if (status === StatusOption.ARCHIVED) {
+    if (activeSort === SortOption.USERS_24_HOURS) {
+      return (
+        <EmptyStateWarning small>
+          {t('There are no releases with active user data (users in the last 24 hours).')}
+        </EmptyStateWarning>
+      );
+    }
+
+    if (activeSort !== SortOption.DATE) {
+      const relativePeriod = getRelativeSummary(
+        statsPeriod || DEFAULT_STATS_PERIOD
+      ).toLowerCase();
+
+      return (
+        <EmptyStateWarning small>
+          {`${t('There are no releases with data in the')} ${relativePeriod}.`}
+        </EmptyStateWarning>
+      );
+    }
+
+    if (activeStatus === StatusOption.ARCHIVED) {
       return (
         <EmptyStateWarning small>
           {t('There are no archived releases.')}
@@ -239,8 +303,9 @@ class ReleasesList extends AsyncView<Props, State> {
     const {organization} = this.props;
     const {releases, reloading} = this.state;
 
-    const activeDisplay = this.getDisplay();
+    const activeSort = this.getSort();
     const activeStatus = this.getStatus();
+    const activeDisplay = this.getDisplay();
 
     return (
       <GlobalSelectionHeader
@@ -263,7 +328,11 @@ class ReleasesList extends AsyncView<Props, State> {
                   selected={activeStatus}
                   onSelect={this.handleStatus}
                 />
-                <ReleaseListDisplayOptions
+                <ReleaseListSortOptions
+                  selected={activeSort}
+                  onSelect={this.handleSortBy}
+                />
+                <ReleaseDisplayOptions
                   selected={activeDisplay}
                   onSelect={this.handleDisplay}
                 />
@@ -295,7 +364,7 @@ const SortAndFilterWrapper = styled('div')`
   grid-gap: ${space(2)};
 
   @media (min-width: ${p => p.theme.breakpoints[0]}) {
-    grid-template-columns: 1fr repeat(2, auto);
+    grid-template-columns: 1fr repeat(3, auto);
   }
 `;
 

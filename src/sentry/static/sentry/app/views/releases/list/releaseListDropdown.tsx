@@ -2,11 +2,14 @@ import React from 'react';
 
 import DropdownControl, {DropdownItem} from 'app/components/dropdownControl';
 
-import {DisplayOption, StatusOption} from './utils';
+import {DisplayOption, SortOption, StatusOption} from './utils';
 
 type Props = {
   label: string;
-  options: Record<DisplayOption, string> | Record<StatusOption, string>;
+  options:
+    | Record<DisplayOption, string>
+    | Record<SortOption, string>
+    | Record<StatusOption, string>;
   selected: string;
   onSelect: (key: string) => void;
 };
