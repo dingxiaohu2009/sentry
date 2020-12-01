@@ -319,7 +319,7 @@ class ReleasesList extends AsyncView<Props, State> {
             <StyledPageHeader>
               <PageHeading>{t('Releases')}</PageHeading>
               <SortAndFilterWrapper>
-                <SearchBar
+                <StyledSearchBar
                   placeholder={t('Search')}
                   onSearch={this.handleSearch}
                   query={this.getQuery()}
@@ -350,6 +350,12 @@ class ReleasesList extends AsyncView<Props, State> {
     );
   }
 }
+
+const StyledSearchBar = styled(SearchBar)`
+  @media (max-width: ${p => p.theme.breakpoints[2]}) {
+    order: 4;
+  }
+`;
 
 const StyledPageHeader = styled(PageHeader)`
   display: grid;

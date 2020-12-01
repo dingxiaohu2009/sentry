@@ -10,7 +10,6 @@ import Version from 'app/components/version';
 import space from 'app/styles/space';
 import {GlobalSelection, Release} from 'app/types';
 
-import NotAvailable from './notAvailable';
 import ReleaseHealth from './releaseHealth';
 import {DisplayOption} from './utils';
 
@@ -40,11 +39,7 @@ const ReleaseCard = ({
       <ReleaseInfo>
         <ReleaseInfoHeader>
           <Version version={version} tooltipRawVersion truncate anchor={false} />
-          {commitCount > 0 ? (
-            <ReleaseStats release={release} withHeading={false} />
-          ) : (
-            <NotAvailable />
-          )}
+          {commitCount > 0 && <ReleaseStats release={release} withHeading={false} />}
         </ReleaseInfoHeader>
         <ReleaseInfoSubheader>
           {versionInfo?.package && (

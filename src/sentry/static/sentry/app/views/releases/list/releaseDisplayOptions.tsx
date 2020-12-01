@@ -31,4 +31,7 @@ export default ReleaseListDisplayOptions;
 
 const StyledReleaseListDropdown = styled(ReleaseListDropdown)`
   z-index: 1;
+  @media (max-width: ${p => p.theme.breakpoints[2]}) {
+    order: 3;
+  }
 `;

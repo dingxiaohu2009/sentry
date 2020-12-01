@@ -20,7 +20,6 @@ import ClippedHealthRows from '../clippedHealthRows';
 import CrashFree from '../crashFree';
 import HealthStatsChart from '../healthStatsChart';
 import HealthStatsPeriod, {StatsPeriod} from '../healthStatsPeriod';
-import HealthStatsSubject, {StatsSubject} from '../healthStatsSubject';
 import NotAvailable from '../notAvailable';
 import {DisplayOption} from '../utils';
 
@@ -45,7 +44,9 @@ const Content = ({
   showPlaceholders,
 }: Props) => {
   const activeStatsPeriod = (location.query.healthStatsPeriod || '24h') as StatsPeriod;
-  const activeStatsSubject = (location.query.healthStat || 'sessions') as StatsSubject;
+  const healthStatsPeriod = (
+    <HealthStatsPeriod location={location} activePeriod={activeStatsPeriod} />
+  );
 
   return (
     <React.Fragment>
@@ -54,14 +55,22 @@ const Content = ({
           <ProjectColumn>{t('Project name')}</ProjectColumn>
           <AdoptionColumn>{t('User Adoption')}</AdoptionColumn>
           {activeDisplay === DisplayOption.CRASH_FREE_USERS ? (
-            <UsersColumn>{t('Crash-free users')}</UsersColumn>
+            <React.Fragment>
+              <UsersColumn>{t('Crash-free users')}</UsersColumn>
+              <DailyColumn>
+                {t('Users')}
+                {healthStatsPeriod}
+              </DailyColumn>
+            </React.Fragment>
           ) : (
-            <SessionsColumn>{t('Crash-free sessions')}</SessionsColumn>
+            <React.Fragment>
+              <SessionsColumn>{t('Crash-free sessions')}</SessionsColumn>
+              <DailyColumn>
+                {t('Sessions')}
+                {healthStatsPeriod}
+              </DailyColumn>
+            </React.Fragment>
           )}
-          <DailyColumn>
-            <HealthStatsSubject location={location} activeSubject={activeStatsSubject} />
-            <HealthStatsPeriod location={location} activePeriod={activeStatsPeriod} />
-          </DailyColumn>
           <CrashesColumn>{t('Crashes')}</CrashesColumn>
           <IssuesColumn>{t('New Issues')}</IssuesColumn>
         </Layout>
@@ -152,7 +161,7 @@ const Content = ({
                         data={stats}
                         height={20}
                         period={activeStatsPeriod}
-                        subject={activeStatsSubject}
+                        activeDisplay={activeDisplay}
                       />
                     </ChartWrapper>
                   ) : (
