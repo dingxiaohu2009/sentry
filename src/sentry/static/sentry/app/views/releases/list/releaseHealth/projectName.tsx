@@ -28,5 +28,7 @@ const ProjectName = ({orgSlug, releaseVersion, project}: Props) => (
 export default ProjectName;
 
 const StyledProjectBadge = styled(ProjectBadge)`
-  margin-right: ${space(1)};
+  @media (min-width: ${p => p.theme.breakpoints[0]}) {
+    padding-right: ${space(1)};
+  }
 `;
