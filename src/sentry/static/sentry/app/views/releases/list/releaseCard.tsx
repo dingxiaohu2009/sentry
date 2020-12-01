@@ -75,6 +75,7 @@ const StyledPanel = styled(Panel)<{reloading: number}>`
 
 const ReleaseInfo = styled('div')`
   padding: ${space(1.5)} ${space(2)};
+  flex-shrink: 0;
 
   @media (min-width: ${p => p.theme.breakpoints[1]}) {
     border-right: 1px solid ${p => p.theme.border};

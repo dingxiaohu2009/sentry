@@ -150,7 +150,10 @@ describe('ReleasesList', function () {
     expect(endpointMock).toHaveBeenCalledWith(
       '/organizations/org-slug/releases/',
       expect.objectContaining({
-        query: expect.objectContaining({sort: SortOption.SESSIONS}),
+        query: expect.objectContaining({
+          sort: SortOption.SESSIONS,
+          healthStat: 'sessions',
+        }),
       })
     );
 
@@ -160,6 +163,9 @@ describe('ReleasesList', function () {
     const dateCreatedOption = sortByOptions.at(0);
     expect(sortByOptions).toHaveLength(5);
     expect(dateCreatedOption.text()).toEqual('Date Created');
+
+    const healthStatsControls = wrapper.find('DailyColumn span').first();
+    expect(healthStatsControls.text()).toEqual('Sessions');
 
     dateCreatedOption.simulate('click');
 
@@ -180,6 +186,7 @@ describe('ReleasesList', function () {
     expect(displayOptions).toHaveLength(2);
 
     const crashFreeUsersOption = displayOptions.at(0);
+    expect(crashFreeUsersOption.props().isActive).toEqual(false);
     expect(crashFreeUsersOption.text()).toEqual('Crash Free Users');
 
     const crashFreeSessionsOption = displayOptions.at(1);
@@ -255,7 +262,6 @@ describe('ReleasesList', function () {
       expect.objectContaining({
         query: expect.objectContaining({
           healthStatsPeriod: '24h',
-          healthStat: 'sessions',
         }),
       })
     );
@@ -263,22 +269,13 @@ describe('ReleasesList', function () {
     const healthStatsControls = wrapper.find('DailyColumn').first();
 
     expect(healthStatsControls.find('Period[selected=true]').text()).toEqual('24h');
-    expect(healthStatsControls.find('Title[selected=true]').text()).toEqual('Sessions');
 
     const period14d = healthStatsControls.find('Period[selected=false] Link').first();
-    const subjectUsers = healthStatsControls.find('Title[selected=false] Link').first();
 
     expect(period14d.prop('to')).toEqual({
       pathname: undefined,
       query: expect.objectContaining({
         healthStatsPeriod: '14d',
-      }),
-    });
-
-    expect(subjectUsers.prop('to')).toEqual({
-      pathname: undefined,
-      query: expect.objectContaining({
-        healthStat: 'users',
       }),
     });
   });

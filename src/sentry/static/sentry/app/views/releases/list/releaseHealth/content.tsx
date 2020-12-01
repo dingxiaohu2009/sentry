@@ -58,7 +58,7 @@ const Content = ({
             <React.Fragment>
               <UsersColumn>{t('Crash-free users')}</UsersColumn>
               <DailyColumn>
-                {t('Users')}
+                <span>{t('Users')}</span>
                 {healthStatsPeriod}
               </DailyColumn>
             </React.Fragment>
@@ -66,7 +66,7 @@ const Content = ({
             <React.Fragment>
               <SessionsColumn>{t('Crash-free sessions')}</SessionsColumn>
               <DailyColumn>
-                {t('Sessions')}
+                <span>{t('Sessions')}</span>
                 {healthStatsPeriod}
               </DailyColumn>
             </React.Fragment>
